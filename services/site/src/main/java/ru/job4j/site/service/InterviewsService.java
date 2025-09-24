@@ -4,16 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.job4j.site.dto.InterviewDTO;
+import ru.job4j.site.dto.ProfileDTO;
 import ru.job4j.site.util.RestPageImpl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class InterviewsService {
+    private final ProfilesService profilesService;
 
     public Page<InterviewDTO> getAll(String token, int page, int size)
             throws JsonProcessingException {
@@ -31,8 +36,9 @@ public class InterviewsService {
         var text = new RestAuthCall(String.format("http://localhost:9912/interviews/%d", type))
                 .get();
         var mapper = new ObjectMapper();
-        return mapper.readValue(text, new TypeReference<>() {
-        });
+        List<InterviewDTO> interviews = mapper.readValue(text, new TypeReference<>() {});
+        addSubmitterName(interviews);
+        return interviews;
     }
 
     public Page<InterviewDTO> getByTopicId(int topicId, int page, int size)
@@ -71,5 +77,17 @@ public class InterviewsService {
             }
         }
         return builder.toString();
+    }
+
+    private List<InterviewDTO> addSubmitterName(List<InterviewDTO> interviewDTOS) {
+        for (InterviewDTO interview : interviewDTOS) {
+            Optional<ProfileDTO> profileOpt = profilesService.getProfileById(interview.getSubmitterId());
+            if (profileOpt.isPresent()) {
+                interview.setSubmitterName(profileOpt.get().getUsername());
+            } else {
+                interview.setSubmitterName("Unknown");
+            }
+        }
+        return interviewDTOS;
     }
 }
