@@ -46,7 +46,7 @@ class FeedbackControllerTest {
 
     @Test
     void whenGetFeedbackFormThenReturnFeedbackPage() throws Exception {
-        var interviewDTO = new InterviewDTO(1, 1, 2, 2,
+        var interviewDTO = new InterviewDTO(1, 1, 2, 2, "submitter",
                 "title", "additional", "contactBy",
                 null, null, 0);
         var token = "1234";
