@@ -11,9 +11,9 @@ import ru.job4j.site.dto.InterviewDTO;
 import ru.job4j.site.dto.ProfileDTO;
 import ru.job4j.site.util.RestPageImpl;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -37,8 +37,7 @@ public class InterviewsService {
                 .get();
         var mapper = new ObjectMapper();
         List<InterviewDTO> interviews = mapper.readValue(text, new TypeReference<>() {});
-        addSubmitterName(interviews);
-        return interviews;
+        return addSubmitterName(interviews);
     }
 
     public Page<InterviewDTO> getByTopicId(int topicId, int page, int size)
@@ -79,15 +78,15 @@ public class InterviewsService {
         return builder.toString();
     }
 
-    private List<InterviewDTO> addSubmitterName(List<InterviewDTO> interviewDTOS) {
-        for (InterviewDTO interview : interviewDTOS) {
-            Optional<ProfileDTO> profileOpt = profilesService.getProfileById(interview.getSubmitterId());
-            if (profileOpt.isPresent()) {
-                interview.setSubmitterName(profileOpt.get().getUsername());
-            } else {
-                interview.setSubmitterName("Unknown");
-            }
+    private List<InterviewDTO> addSubmitterName(List<InterviewDTO> interviewDTOs) {
+        List<Integer> userIds  = interviewDTOs.stream().map(InterviewDTO::getSubmitterId).distinct().toList();
+            List<ProfileDTO> profiles = profilesService.getAllProfilesByListOfUserIds(userIds);
+        Map<Integer, ProfileDTO> idProfileMap = profiles.stream().collect(Collectors.toMap(ProfileDTO::getId, profile -> profile));
+            for (InterviewDTO interview : interviewDTOs) {
+                int userId = interview.getSubmitterId();
+                ProfileDTO profile = idProfileMap.get(userId);
+                interview.setSubmitterName(profile != null ? profile.getUsername() : "Unknown");
         }
-        return interviewDTOS;
+        return interviewDTOs;
     }
 }

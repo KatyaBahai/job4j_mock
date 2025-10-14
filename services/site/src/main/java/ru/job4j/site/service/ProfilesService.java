@@ -39,6 +39,19 @@ public class ProfilesService {
         return Optional.ofNullable(profile.getBody());
     }
 
+    public List<ProfileDTO> getAllProfilesByListOfUserIds(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        String uri = URL_PROFILES + "by-ids";
+        var response = webClientAuthCall
+                .doPostReqBody(uri, userIds)
+                .block();
+        return Optional.ofNullable(response)
+                .map(ResponseEntity::getBody)
+                .orElse(List.of());
+    }
+
     /**
      * Метод получает из сервиса Auth список всех профилей.
      *
