@@ -65,4 +65,8 @@ public class TgAuthCallWebClient {
         log.error("POST request failed, fallback triggered: {}", throwable.getMessage());
         return Mono.empty(); // Или возвращайте какой-то запасной ответ
     }
+
+    public void setWebClient(WebClient webClient) {
+        this.webClient = webClient;
+    }
 }

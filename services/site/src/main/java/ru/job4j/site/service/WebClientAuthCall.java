@@ -102,6 +102,20 @@ public class WebClientAuthCall {
                 .doOnError(err -> log.error("API not found: {}", err.getMessage()));
     }
 
+    public Mono<ResponseEntity<List<ProfileDTO>>> doPostReqBody(String url, List<Integer> ids) {
+        return webClient
+                .post()
+                .uri(urlBuilder -> urlBuilder
+                        .path(url)
+                        .build())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ids)
+                .retrieve()
+                .toEntityList(ProfileDTO.class)
+                .doOnError(err -> log.error("API not found: {}", err.getMessage()));
+    }
+
     /**
      * Метод обрабатывает запрос get получения изображения из сервиса Auth
      *

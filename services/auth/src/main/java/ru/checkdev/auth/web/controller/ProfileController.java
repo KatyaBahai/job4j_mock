@@ -3,10 +3,7 @@ package ru.checkdev.auth.web.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.checkdev.auth.dto.ProfileDTO;
 import ru.checkdev.auth.service.ProfileService;
 
@@ -51,6 +48,14 @@ public class ProfileController {
     @GetMapping("/")
     public ResponseEntity<List<ProfileDTO>> getAllProfilesOrderByCreateDesc() {
         var profiles = profileService.findProfilesOrderByCreatedDesc();
+        return new ResponseEntity<>(
+                profiles,
+                profiles.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+    }
+
+    @PostMapping("/by-ids")
+    public ResponseEntity<List<ProfileDTO>> getProfilesByUserIds(@RequestBody List<Integer> userIds) {
+        var profiles = profileService.findProfilesByUserIds(userIds);
         return new ResponseEntity<>(
                 profiles,
                 profiles.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
